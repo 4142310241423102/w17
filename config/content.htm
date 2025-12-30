@@ -1,4 +1,8 @@
 <h1>About</h1>
+<p></p>
+<p><span>執行三個程式的影片連結：</span><a href="https://youtu.be/PZbXoRjJsRk?si=1T8Jf0veygwvqIgG">https://youtu.be/PZbXoRjJsRk?si=1T8Jf0veygwvqIgG</a></p>
+<p><span>心得：</span><span>在執行這三個程式的過程中，我運用了可攜程式套件進行操作，這讓我能夠看到程式執行的結果並反覆修正錯誤。雖然一開始對操作流程不熟悉，且常常因為一個小錯誤導致程式無法正常執行，但通過不斷嘗試、查詢資料、請教同學和課堂上老師的教學，我逐漸理解每個步驟的含義。這樣的學習方式雖然花費較多時間，但卻讓我對整個流程留下了更深刻的印象。 此外，與AI的互動也讓我學會了如何更有效率地發現問題並思考解決方法，進一步培養了自主學習和問題解決的能力。</span></p>
+<p><span></span></p>
 <p>課程名稱: 計算機程式</p>
 <p>課程評分:</p>
 <p style="padding-left: 30px;"><span style="background-color: #ffff00;">學習心得報告 (60%)</span> - MS Teams 線上參與，<span style="background-color: #ccffcc;">6人一組</span>每三週發表學習心得。</p>
@@ -11,8 +15,222 @@
 <p style="padding-left: 60px;">w17 (<span style="background-color: #ccffcc;">1b 採 Youtube 影片簡報</span>): 計算機程式課程學到了什麼？</p>
 <p style="padding-left: 60px;">w18: 課程總結</p>
 <p style="padding-left: 30px;"><span style="background-color: #ffff00;">個人與分組網站維護 (40%)</span> - 每週至少兩次推送與課程進度相關的學習內容與心得。</p>
-<p style="padding-left: 60px;">w9 期中自評、w18 期末自評</p>
-<h1>Brython</h1>
+<p style="padding-left: 60px;">w9 期中自評、w18 期末自評</p><h1>點擊球</h1>
+<p>在時間內點擊移動的球，獲得高分！</p>
+<!-- ===== Brython ===== -->
+<script src="/static/brython.js"></script>
+<script src="/static/brython_stdlib.js"></script>
+<script>
+window.onload = function(){
+  brython({debug:1, pythonpath:['/static/']});
+}
+</script>
+<!-- ===== 遊戲區 ===== -->
+<div id="brython_div1"></div>
+<script type="text/python3">
+from browser import document, timer
+import random, time
+
+# ===== 遊戲設定 =====
+GAME_DURATION = 40
+BALL_SIZE = 50
+
+# ===== 狀態 =====
+score = 0
+game_active = False
+ball_handle = None
+time_handle = None
+
+# ===== 顏色 =====
+colors = ["red", "blue", "green", "orange", "purple"]
+current_color = "blue"
+
+# ===== 遊戲區 =====
+game_area = document["brython_div1"]
+game_area.style.width = "600px"
+game_area.style.height = "500px"
+game_area.style.margin = "20px auto"
+game_area.style.border = "3px solid #333"
+game_area.style.backgroundColor = "#e0e0ff"
+game_area.style.position = "relative"
+game_area.style.overflow = "hidden"
+game_area.style.cursor = "crosshair"
+
+# ===== CSS 特效 =====
+style = document.createElement("style")
+style.text = """
+@keyframes ripple {
+  from { transform: scale(0.5); opacity: 0.8; }
+  to   { transform: scale(2.5); opacity: 0; }
+}
+@keyframes floatScore {
+  from { transform: translateY(0); opacity: 1; }
+  to   { transform: translateY(-40px); opacity: 0; }
+}
+.ripple {
+  position: absolute;
+  border: 3px solid white;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: ripple 0.5s ease-out;
+  pointer-events: none;
+}
+.float-score {
+  position: absolute;
+  font-size: 22px;
+  font-weight: bold;
+  color: red;
+  animation: floatScore 0.6s ease-out;
+  pointer-events: none;
+}
+"""
+document <= style
+
+# ===== 分數 =====
+score_display = document.createElement("div")
+score_display.style.position = "absolute"
+score_display.style.top = "10px"
+score_display.style.left = "10px"
+score_display.style.fontSize = "1.2em"
+score_display.style.fontWeight = "bold"
+score_display.style.backgroundColor = "rgba(255,255,255,0.7)"
+score_display.style.padding = "5px"
+game_area <= score_display
+
+# ===== 時間 =====
+timer_display = document.createElement("div")
+timer_display.style.position = "absolute"
+timer_display.style.top = "10px"
+timer_display.style.right = "10px"
+timer_display.style.fontSize = "1.2em"
+timer_display.style.fontWeight = "bold"
+timer_display.style.backgroundColor = "rgba(255,255,255,0.7)"
+timer_display.style.padding = "5px"
+game_area <= timer_display
+
+# ===== 球 =====
+ball = document.createElement("div")
+ball.style.width = f"{BALL_SIZE}px"
+ball.style.height = f"{BALL_SIZE}px"
+ball.style.borderRadius = "50%"
+ball.style.position = "absolute"
+ball.style.cursor = "pointer"
+ball.style.transition = "top 0.5s, left 0.5s"
+ball.style.backgroundColor = current_color
+game_area <= ball
+
+# ===== 波紋 =====
+def show_ripple(x, y):
+    r = document.createElement("div")
+    r.className = "ripple"
+    r.style.left = f"{x}px"
+    r.style.top = f"{y}px"
+    game_area <= r
+    timer.set_timeout(lambda: r.remove(), 500)
+
+# ===== +1 浮出 =====
+def show_plus_one(x, y):
+    fs = document.createElement("div")
+    fs.className = "float-score"
+    fs.text = "+1"
+    fs.style.left = f"{x + 15}px"
+    fs.style.top = f"{y}px"
+    game_area <= fs
+    timer.set_timeout(lambda: fs.remove(), 600)
+
+# ===== 球移動 =====
+def move_ball():
+    if not game_active:
+        return
+    max_x = game_area.clientWidth - BALL_SIZE
+    max_y = game_area.clientHeight - BALL_SIZE
+    ball.style.left = f"{random.randint(0, max_x)}px"
+    ball.style.top = f"{random.randint(40, max_y)}px"
+
+# ===== 點擊球 =====
+def hit_ball(ev):
+    global score, current_color
+    if not game_active:
+        return
+
+    score += 1
+    score_display.text = f"分數: {score}"
+
+    x = ball.offsetLeft
+    y = ball.offsetTop
+
+    show_ripple(x, y)
+    show_plus_one(x, y)
+
+    current_color = random.choice(colors)
+    ball.style.backgroundColor = current_color
+    move_ball()
+    ev.stopPropagation()
+
+ball.bind("click", hit_ball)
+
+# ===== 結束畫面 =====
+game_over = document.createElement("div")
+game_over.style.position = "absolute"
+game_over.style.top = "50%"
+game_over.style.left = "50%"
+game_over.style.transform = "translate(-50%, -50%)"
+game_over.style.backgroundColor = "rgba(0,0,0,0.9)"
+game_over.style.color = "white"
+game_over.style.padding = "30px"
+game_over.style.borderRadius = "10px"
+game_over.style.fontSize = "2em"
+game_over.style.display = "none"
+game_over.style.textAlign = "center"
+game_area <= game_over
+
+# ===== 重新開始 =====
+def restart_game(ev=None):
+    game_over.style.display = "none"
+    start_game()
+
+# ===== 時間 =====
+def check_time():
+    global game_active
+    remain = int(end_time - time.time())
+
+    if remain <= 5 and remain > 0:
+        timer_display.style.color = "red"
+    else:
+        timer_display.style.color = "black"
+
+    if remain <= 0:
+        timer_display.text = "時間: 0s"
+        game_active = False
+        game_over.innerHTML = f"遊戲結束<br>最終分數: {score}<br>"
+        btn = document.createElement("button")
+        btn.text = "重新開始"
+        btn.style.fontSize = "0.6em"
+        btn.style.marginTop = "15px"
+        btn.bind("click", restart_game)
+        game_over <= btn
+        game_over.style.display = "block"
+        timer.clear_interval(ball_handle)
+        timer.clear_interval(time_handle)
+    else:
+        timer_display.text = f"時間: {remain}s"
+
+# ===== 開始 =====
+def start_game():
+    global score, game_active, end_time, ball_handle, time_handle
+    score = 0
+    game_active = True
+    score_display.text = "分數: 0"
+    timer_display.text = f"時間: {GAME_DURATION}s"
+    timer_display.style.color = "black"
+    end_time = time.time() + GAME_DURATION
+    move_ball()
+    ball_handle = timer.set_interval(move_ball, 1000)
+    time_handle = timer.set_interval(check_time, 1000)
+
+start_game()
+</script><h1>Brython</h1>
 <p><a href="https://brython.info/">Brython</a> 是一個將 <a href="https://en.wikipedia.org/wiki/Python_(programming_language)">Python</a> 語法編譯為 <a href="https://developer.mozilla.org/zh-TW/docs/Web/JavaScript">JavaScript</a> 的工具，能直接在瀏覽器中以 <a href="https://en.wikipedia.org/wiki/Python_(programming_language)">Python</a> 撰寫前端網頁程式。</p>
 <p><button id="add1to100">1 add to 100</button><button id="robot1">機器人巡邏</button><button id="free_walk">自由行</button></p>
 <!-- 導入 brython 程式庫 -->
@@ -307,8 +525,7 @@ doc["aitetris"].bind("click", aitetris.do)
 <p><!-- Brython 程式執行的結果, 都以 brython_div1 作為切入位置 --></p>
 <div id="brython_div2"></div>
 <!-- editor2 結束 --><hr/>
-<p></p>
-<h2>Pyodide3</h2>
+<p></p><h2>Pyodide3</h2>
 <p>Pyodide3 則在 <a href="https://mde.tw/cp2025/content/Pyodide.html">Pyodide</a> 與 <a href="https://mde.tw/cp2025/content/Pyodide2.html">Pyodide2</a> 頁面架構下，進一步導入 <a href="https://gist.githubusercontent.com/mdecycu/ec4bb35dd0769e7a83d2a9fa57878a67/raw/9f43571ec070ea3e24b083525ee27275a96efcc8/robot_w_world.py">robot_w_world.py</a>，在既有的水平圍牆 <a href="https://mde.tw/cp2025/reeborg/src/images/north.png">north.png</a> 與垂直圍牆 <a href="https://mde.tw/cp2025/reeborg/src/images/east.png">east.png</a> 檔案之外，加入 <a href="https://mde.tw/cp2025/reeborg/src/images/carrot.png">carrot.png</a>、<a href="https://mde.tw/cp2025/reeborg/src/images/grass.png">grass.png</a> 與 <a href="https://mde.tw/cp2025/reeborg/src/images/pale_grass.png">pale_grass.png</a> 等圖檔。並且擴充可從 URL 讀進 json 格式的 world 變數功能，以便製作出更多元的場景任務，要求機器人執行。</p>
 <p>其中 src URL 變數，可以將網路上的機器人控制程式導入 Pyodide3 頁面外，world URL 變數則可以導入源自 <a href="https://mde.tw/reeborg">Reeborg</a> 機器人程式所設定的 json 格式場景。</p>
 <p>由於 Reeborg 系統中的 png 圖檔均非透明背景，<a href="https://gist.githubusercontent.com/mdecycu/ec4bb35dd0769e7a83d2a9fa57878a67/raw/9f43571ec070ea3e24b083525ee27275a96efcc8/robot_w_world.py">robot_w_world.py</a> 必須利用 HTML 中的 CANVAS，將關鍵的白色背景，以透明的方式顯示。</p>

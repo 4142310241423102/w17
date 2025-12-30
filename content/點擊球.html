@@ -142,24 +142,222 @@ img.add_border {
           </div>
           
         </header>
-    <div id="tipue_search_content"> <a href='點擊球.html'>Next</a> >> 點擊球<br /><h1>About</h1>
-<p></p>
-<p><span>執行三個程式的影片連結：</span><a href="https://youtu.be/PZbXoRjJsRk?si=1T8Jf0veygwvqIgG">https://youtu.be/PZbXoRjJsRk?si=1T8Jf0veygwvqIgG</a></p>
-<p><span>心得：</span><span>在執行這三個程式的過程中，我運用了可攜程式套件進行操作，這讓我能夠看到程式執行的結果並反覆修正錯誤。雖然一開始對操作流程不熟悉，且常常因為一個小錯誤導致程式無法正常執行，但通過不斷嘗試、查詢資料、請教同學和課堂上老師的教學，我逐漸理解每個步驟的含義。這樣的學習方式雖然花費較多時間，但卻讓我對整個流程留下了更深刻的印象。 此外，與AI的互動也讓我學會了如何更有效率地發現問題並思考解決方法，進一步培養了自主學習和問題解決的能力。</span></p>
-<p><span></span></p>
-<p>課程名稱: 計算機程式</p>
-<p>課程評分:</p>
-<p style="padding-left: 30px;"><span style="background-color: #ffff00;">學習心得報告 (60%)</span> - MS Teams 線上參與，<span style="background-color: #ccffcc;">6人一組</span>每三週發表學習心得。</p>
-<p style="padding-left: 60px;">w3、w7、w10、w14、w17、w18</p>
-<p style="padding-left: 60px;">學習心得報告主題:</p>
-<p style="padding-left: 60px;">w3: 什麼是 git, GitHub, gist 與 cmsimde? 如何使用這些工具？為什麼要使用這些工具？ (<a href="https://mde.tw/cp2025/content/Brython.html?src=https://gist.githubusercontent.com/mdecycu/71ff1c69dd233e6a5a83dd60997950de/raw/b4134dc3724f9c6aa1de7534a74f298288de0fa5/round_dot_move.py">動態模擬</a>)</p>
-<p style="padding-left: 60px;">w7: Brython 是什麼？如何在瀏覽器配置 Brython 環境？ Brython 能做什麼？ (<a href="https://mde.tw/cp2025/content/Brython.html">Brython</a>, <a href="https://mde.tw/cp2025/content/Robot_ex.html">Examples</a>)</p>
-<p style="padding-left: 60px;">w10: 如何在瀏覽器中模擬機器人作動？ (<a href="https://mde.tw/cp2025/content/Brython.html?src=https://gist.githubusercontent.com/mdecycu/58fed8bd2f5be98a6456a8dcae512011/raw/4019adba4ee4be19c35982d835bad8e7d83a7b2f/brython_robot4_ex1.py">機器人作動</a>)</p>
-<p style="padding-left: 60px;">w14: 在瀏覽器中模擬機器人作動的目的是什麼？ (<a href="./../downloads/otto_robot.7z">otto_robot.7z</a>, <a href="https://mde.tw/cad2025/content/Homework.html">Plotter</a>, <a href="./../downloads/open_duck_mini.7z">open_duck_mini.7z</a> ,<a href="https://webots.cloud/AcTNYs0">https://webots.cloud/AcTNYs0</a>)</p>
-<p style="padding-left: 60px;">w17 (<span style="background-color: #ccffcc;">1b 採 Youtube 影片簡報</span>): 計算機程式課程學到了什麼？</p>
-<p style="padding-left: 60px;">w18: 課程總結</p>
-<p style="padding-left: 30px;"><span style="background-color: #ffff00;">個人與分組網站維護 (40%)</span> - 每週至少兩次推送與課程進度相關的學習內容與心得。</p>
-<p style="padding-left: 60px;">w9 期中自評、w18 期末自評</p><br /> <a href='點擊球.html'>Next</a> >> 點擊球</div>
+    <div id="tipue_search_content">About << <a href='About.html'>Previous</a> <a href='Brython.html'>Next</a> >> Brython<br /><h1>點擊球</h1>
+<p>在時間內點擊移動的球，獲得高分！</p>
+<!-- ===== Brython ===== -->
+<script src="./../cmsimde/static/brython.js"></script>
+<script src="./../cmsimde/static/brython_stdlib.js"></script>
+<script>
+window.onload = function(){
+  brython({debug:1, pythonpath:['./../cmsimde/static/']});
+}
+</script>
+<!-- ===== 遊戲區 ===== -->
+<div id="brython_div1"></div>
+<script type="text/python3">
+from browser import document, timer
+import random, time
+
+# ===== 遊戲設定 =====
+GAME_DURATION = 40
+BALL_SIZE = 50
+
+# ===== 狀態 =====
+score = 0
+game_active = False
+ball_handle = None
+time_handle = None
+
+# ===== 顏色 =====
+colors = ["red", "blue", "green", "orange", "purple"]
+current_color = "blue"
+
+# ===== 遊戲區 =====
+game_area = document["brython_div1"]
+game_area.style.width = "600px"
+game_area.style.height = "500px"
+game_area.style.margin = "20px auto"
+game_area.style.border = "3px solid #333"
+game_area.style.backgroundColor = "#e0e0ff"
+game_area.style.position = "relative"
+game_area.style.overflow = "hidden"
+game_area.style.cursor = "crosshair"
+
+# ===== CSS 特效 =====
+style = document.createElement("style")
+style.text = """
+@keyframes ripple {
+  from { transform: scale(0.5); opacity: 0.8; }
+  to   { transform: scale(2.5); opacity: 0; }
+}
+@keyframes floatScore {
+  from { transform: translateY(0); opacity: 1; }
+  to   { transform: translateY(-40px); opacity: 0; }
+}
+.ripple {
+  position: absolute;
+  border: 3px solid white;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: ripple 0.5s ease-out;
+  pointer-events: none;
+}
+.float-score {
+  position: absolute;
+  font-size: 22px;
+  font-weight: bold;
+  color: red;
+  animation: floatScore 0.6s ease-out;
+  pointer-events: none;
+}
+"""
+document <= style
+
+# ===== 分數 =====
+score_display = document.createElement("div")
+score_display.style.position = "absolute"
+score_display.style.top = "10px"
+score_display.style.left = "10px"
+score_display.style.fontSize = "1.2em"
+score_display.style.fontWeight = "bold"
+score_display.style.backgroundColor = "rgba(255,255,255,0.7)"
+score_display.style.padding = "5px"
+game_area <= score_display
+
+# ===== 時間 =====
+timer_display = document.createElement("div")
+timer_display.style.position = "absolute"
+timer_display.style.top = "10px"
+timer_display.style.right = "10px"
+timer_display.style.fontSize = "1.2em"
+timer_display.style.fontWeight = "bold"
+timer_display.style.backgroundColor = "rgba(255,255,255,0.7)"
+timer_display.style.padding = "5px"
+game_area <= timer_display
+
+# ===== 球 =====
+ball = document.createElement("div")
+ball.style.width = f"{BALL_SIZE}px"
+ball.style.height = f"{BALL_SIZE}px"
+ball.style.borderRadius = "50%"
+ball.style.position = "absolute"
+ball.style.cursor = "pointer"
+ball.style.transition = "top 0.5s, left 0.5s"
+ball.style.backgroundColor = current_color
+game_area <= ball
+
+# ===== 波紋 =====
+def show_ripple(x, y):
+    r = document.createElement("div")
+    r.className = "ripple"
+    r.style.left = f"{x}px"
+    r.style.top = f"{y}px"
+    game_area <= r
+    timer.set_timeout(lambda: r.remove(), 500)
+
+# ===== +1 浮出 =====
+def show_plus_one(x, y):
+    fs = document.createElement("div")
+    fs.className = "float-score"
+    fs.text = "+1"
+    fs.style.left = f"{x + 15}px"
+    fs.style.top = f"{y}px"
+    game_area <= fs
+    timer.set_timeout(lambda: fs.remove(), 600)
+
+# ===== 球移動 =====
+def move_ball():
+    if not game_active:
+        return
+    max_x = game_area.clientWidth - BALL_SIZE
+    max_y = game_area.clientHeight - BALL_SIZE
+    ball.style.left = f"{random.randint(0, max_x)}px"
+    ball.style.top = f"{random.randint(40, max_y)}px"
+
+# ===== 點擊球 =====
+def hit_ball(ev):
+    global score, current_color
+    if not game_active:
+        return
+
+    score += 1
+    score_display.text = f"分數: {score}"
+
+    x = ball.offsetLeft
+    y = ball.offsetTop
+
+    show_ripple(x, y)
+    show_plus_one(x, y)
+
+    current_color = random.choice(colors)
+    ball.style.backgroundColor = current_color
+    move_ball()
+    ev.stopPropagation()
+
+ball.bind("click", hit_ball)
+
+# ===== 結束畫面 =====
+game_over = document.createElement("div")
+game_over.style.position = "absolute"
+game_over.style.top = "50%"
+game_over.style.left = "50%"
+game_over.style.transform = "translate(-50%, -50%)"
+game_over.style.backgroundColor = "rgba(0,0,0,0.9)"
+game_over.style.color = "white"
+game_over.style.padding = "30px"
+game_over.style.borderRadius = "10px"
+game_over.style.fontSize = "2em"
+game_over.style.display = "none"
+game_over.style.textAlign = "center"
+game_area <= game_over
+
+# ===== 重新開始 =====
+def restart_game(ev=None):
+    game_over.style.display = "none"
+    start_game()
+
+# ===== 時間 =====
+def check_time():
+    global game_active
+    remain = int(end_time - time.time())
+
+    if remain <= 5 and remain > 0:
+        timer_display.style.color = "red"
+    else:
+        timer_display.style.color = "black"
+
+    if remain <= 0:
+        timer_display.text = "時間: 0s"
+        game_active = False
+        game_over.innerHTML = f"遊戲結束<br>最終分數: {score}<br>"
+        btn = document.createElement("button")
+        btn.text = "重新開始"
+        btn.style.fontSize = "0.6em"
+        btn.style.marginTop = "15px"
+        btn.bind("click", restart_game)
+        game_over <= btn
+        game_over.style.display = "block"
+        timer.clear_interval(ball_handle)
+        timer.clear_interval(time_handle)
+    else:
+        timer_display.text = f"時間: {remain}s"
+
+# ===== 開始 =====
+def start_game():
+    global score, game_active, end_time, ball_handle, time_handle
+    score = 0
+    game_active = True
+    score_display.text = "分數: 0"
+    timer_display.text = f"時間: {GAME_DURATION}s"
+    timer_display.style.color = "black"
+    end_time = time.time() + GAME_DURATION
+    move_ball()
+    ball_handle = timer.set_interval(move_ball, 1000)
+    time_handle = timer.set_interval(check_time, 1000)
+
+start_game()
+</script><br />About << <a href='About.html'>Previous</a> <a href='Brython.html'>Next</a> >> Brython</div>
         
     <!-- footer -->
       <div class="container">
