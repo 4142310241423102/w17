@@ -1,0 +1,18 @@
+def turn_around():
+    turn_left()
+    turn_left()
+
+def move_around_world():
+    # 假设 Reeborg 从起点开始
+    # 需要走四个边，逐一检查每个方向，避免踩到草地
+    
+    for _ in range(4):  # 走四个边
+        while front_is_clear():  # 一直走到前面有障碍
+            move()  # 移动一格
+        turn_left()  # 逆时针转90度
+
+# 主程序
+move_around_world()
+
+
+
